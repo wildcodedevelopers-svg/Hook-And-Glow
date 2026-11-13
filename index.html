@@ -173,8 +173,8 @@ body{font-family:'Inter',sans-serif;background:#09050d;color:#f3f4f6;overflow-x:
 
 <script>
 // ===== CONFIG: paste your Supabase values (Project Settings > API) =====
-const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const SUPABASE_URL = 'https://cdygbmepvbcjvmdzjsxs.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_v69s66Fd0R_-eC-91hzfcw_gHgE3oaU';
 const WHATSAPP = '263778920506';
 const BUCKET = 'product-images';
 // =======================================================================
@@ -233,10 +233,16 @@ function setAdmin(on) {
 }
 async function handleLogin(e) {
   e.preventDefault();
+  if (SUPABASE_URL.includes('YOUR-PROJECT') || SUPABASE_ANON_KEY.includes('YOUR-ANON')) {
+    return toast('Supabase URL / key not set in index.html');
+  }
   $('aBtn').disabled = true;
-  const { error } = await sb.auth.signInWithPassword({ email: $('aEmail').value.trim(), password: $('aPass').value });
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('aEmail').value.trim().toLowerCase(),
+    password: $('aPass').value
+  });
   $('aBtn').disabled = false;
-  if (error) return toast('Wrong email or password');
+  if (error) return toast(error.message);
   hide('authModal'); $('aPass').value = ''; toast('Signed in');
 }
 async function logout() { await sb.auth.signOut(); toast('Signed out'); }
