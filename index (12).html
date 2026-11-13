@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook and Glow by Winnie</title>
+<link rel="icon" href="logo-round.jpg">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{darkBase:'#09050d',darkCard:'#130a1b',glowPink:'#ff2a8d',glowMagenta:'#d946ef',glowGold:'#ffd700'},fontFamily:{serif:['Cinzel','serif']}}}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+body{font-family:'Inter',sans-serif;background:#09050d;color:#f3f4f6;overflow-x:hidden}
+.font-serif{font-family:'Cinzel',serif}
+.glass{background:rgba(19,10,27,.85);backdrop-filter:blur(16px);border:1px solid rgba(255,42,141,.25)}
+.inp{width:100%;background:rgba(0,0,0,.6);border:1px solid rgba(255,42,141,.3);border-radius:.5rem;padding:.7rem;font-size:.875rem;color:#fff;outline:none}
+.inp:focus{border-color:#ff2a8d}
+.lbl{display:block;font-size:.7rem;font-weight:600;color:#d1d5db;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
+.btn{background:linear-gradient(90deg,#ff2a8d,#d946ef);color:#fff;font-weight:600;border-radius:.75rem;padding:.6rem 1rem;font-size:.8rem}
+.cat-btn.on{background:#ff2a8d;color:#fff;border-color:#ff2a8d}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="bg-gradient-to-r from-glowPink via-purple-900 to-glowMagenta text-xs font-semibold py-2 px-4 text-center tracking-widest uppercase">
+  ALL PRICES IN USD ($) • DIRECT WHATSAPP ORDERS <span id="adminBadge" class="hidden ml-2 bg-black/50 px-2 rounded border border-glowPink text-pink-300">ADMIN</span>
+</div>
+
+<header class="sticky top-0 z-40 glass">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-3">
+      <img src="logo-round.jpg" alt="Hook and Glow logo" class="w-11 h-11 rounded-full border-2 border-glowPink object-cover">
+      <div><div class="font-serif font-extrabold text-lg text-white leading-none">HOOK &amp; GLOW</div><div class="text-[10px] tracking-widest text-glowGold uppercase">By Winnie</div></div>
+    </a>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleSearch()" class="p-2 text-gray-300 hover:text-glowPink"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <button onclick="show('wishDrawer')" class="p-2 text-gray-300 hover:text-glowPink relative"><i class="fa-solid fa-heart"></i><span id="wishBadge" class="hidden absolute -top-1 -right-1 bg-glowPink text-[10px] rounded-full h-4 w-4 flex items-center justify-center">0</span></button>
+      <button onclick="show('cartDrawer')" class="p-2 text-gray-300 hover:text-glowPink relative"><i class="fa-solid fa-bag-shopping"></i><span id="cartBadge" class="absolute -top-1 -right-1 bg-glowPink text-[10px] rounded-full h-4 w-4 flex items-center justify-center">0</span></button>
+      <div id="authBtn"></div>
+    </div>
+  </div>
+  <div id="searchBar" class="hidden px-4 py-3 border-t border-glowPink/20">
+    <input id="searchInput" oninput="searchQuery=this.value.toLowerCase().trim();renderProducts()" placeholder="Search products..." class="inp max-w-xl mx-auto block">
+  </div>
+</header>
+
+<section class="relative py-16 px-4 text-center overflow-hidden">
+  <img src="logo.jpg" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25">
+  <div class="absolute inset-0 bg-gradient-to-t from-darkBase to-transparent"></div>
+  <div class="relative max-w-3xl mx-auto space-y-4">
+    <h1 class="font-serif text-4xl sm:text-6xl font-extrabold uppercase">Hook &amp; Glow <span class="block text-glowPink">By Winnie</span></h1>
+    <p class="text-gray-300">Raw virgin hair plugs, bundle deals, custom wigs and beauty essentials. Priced in USD ($), order direct on WhatsApp.</p>
+    <a href="#catalog" class="inline-block btn px-8 py-3">Shop Catalog</a>
+  </div>
+</section>
+
+<div id="adminBar" class="hidden bg-darkCard border-y border-glowPink/30 py-4 px-4">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <p class="text-sm text-gray-200"><span class="text-glowPink font-bold uppercase text-xs">Owner mode</span><br>Add, edit or delete products, prices and photos. Changes go live for all buyers.</p>
+    <button onclick="openForm()" class="btn"><i class="fa-solid fa-plus mr-1"></i> Add New Product</button>
+  </div>
+</div>
+
+<main id="catalog" class="max-w-7xl mx-auto px-4 py-12">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-8 border-b border-glowPink/20 pb-4">
+    <h2 class="font-serif text-3xl font-bold">Luxury Collection</h2>
+    <div class="flex flex-wrap gap-2 text-xs" id="cats"></div>
+  </div>
+  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+  <div id="empty" class="hidden text-center py-16 text-gray-400">No products yet.</div>
+</main>
+
+<footer class="bg-darkCard border-t border-glowPink/20 py-8 px-4 text-xs text-gray-500">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between gap-3">
+    <p>© 2026 Hook and Glow by Winnie. All prices in USD ($). WhatsApp: +263778920506</p>
+    <p class="font-bold tracking-widest text-glowPink uppercase">Made by ELHAM STUDIOS</p>
+  </div>
+</footer>
+
+<!-- Quick view -->
+<div id="viewModal" class="fixed inset-0 z-50 bg-black/85 hidden flex items-center justify-center p-4">
+  <div class="glass max-w-3xl w-full rounded-2xl relative max-h-[90vh] overflow-y-auto">
+    <button onclick="hide('viewModal')" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/70"><i class="fa-solid fa-xmark"></i></button>
+    <div id="viewBody" class="grid md:grid-cols-2 gap-6 p-6"></div>
+  </div>
+</div>
+
+<!-- Product form -->
+<div id="formModal" class="fixed inset-0 z-50 bg-black/85 hidden flex items-center justify-center p-4">
+  <div class="glass max-w-xl w-full rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+    <button onclick="hide('formModal')" class="absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+    <h3 id="formTitleH" class="font-serif text-2xl font-bold mb-4">Product</h3>
+    <form onsubmit="saveProduct(event)" class="space-y-4">
+      <input type="hidden" id="fId">
+      <div><label class="lbl">Title</label><input id="fTitle" required class="inp"></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="lbl">Price (USD $)</label><input id="fPrice" type="number" step="0.01" min="0" required class="inp"></div>
+        <div><label class="lbl">Category</label>
+          <select id="fCat" class="inp"><option>Hair Plugs</option><option>Bundles</option><option>Beauty</option><option value="Style">Style &amp; Wigs</option></select></div>
+      </div>
+      <div><label class="lbl">Description</label><textarea id="fDesc" rows="3" required class="inp"></textarea></div>
+      <div>
+        <label class="lbl">Product Photo</label>
+        <input type="file" accept="image/*" onchange="pickImage(event)" class="w-full text-xs text-gray-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-glowPink file:text-white">
+        <img id="fPreview" class="hidden mt-2 h-28 rounded-lg object-cover border border-glowPink/30" alt="">
+      </div>
+      <div class="flex justify-end gap-3 pt-3 border-t border-glowPink/20">
+        <button type="button" onclick="hide('formModal')" class="px-4 py-2 rounded-lg border border-gray-600 text-sm">Cancel</button>
+        <button id="fSave" type="submit" class="btn">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Login -->
+<div id="authModal" class="fixed inset-0 z-50 bg-black/85 hidden flex items-center justify-center p-4">
+  <div class="glass max-w-md w-full rounded-2xl p-6 relative">
+    <button onclick="hide('authModal')" class="absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+    <h3 class="font-serif text-2xl font-bold text-center mb-1">Owner Sign In</h3>
+    <p class="text-xs text-gray-400 text-center mb-4">Only the store owner can manage products.</p>
+    <form onsubmit="handleLogin(event)" class="space-y-4">
+      <div><label class="lbl">Email</label><input id="aEmail" type="email" required autocomplete="username" class="inp"></div>
+      <div><label class="lbl">Password</label><input id="aPass" type="password" required autocomplete="current-password" class="inp"></div>
+      <button id="aBtn" class="btn w-full py-3">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- Cart -->
+<div id="cartDrawer" class="fixed inset-0 z-50 bg-black/70 hidden">
+  <div class="fixed right-0 top-0 bottom-0 w-full max-w-md glass p-6 flex flex-col justify-between">
+    <div>
+      <div class="flex justify-between items-center pb-3 border-b border-glowPink/20"><h3 class="font-serif text-xl font-bold">Shopping Bag</h3><button onclick="hide('cartDrawer')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div id="cartItems" class="mt-4 space-y-3 max-h-[58vh] overflow-y-auto"></div>
+    </div>
+    <div class="pt-3 border-t border-glowPink/20 space-y-3">
+      <div class="flex justify-between"><span class="text-gray-400 text-sm">Total (USD)</span><span id="cartTotal" class="font-serif text-2xl text-glowPink font-bold">$0.00</span></div>
+      <button onclick="openCheckout()" class="btn w-full py-3">Proceed To Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wishlist -->
+<div id="wishDrawer" class="fixed inset-0 z-50 bg-black/70 hidden">
+  <div class="fixed right-0 top-0 bottom-0 w-full max-w-md glass p-6">
+    <div class="flex justify-between items-center pb-3 border-b border-glowPink/20"><h3 class="font-serif text-xl font-bold">Wishlist</h3><button onclick="hide('wishDrawer')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="wishItems" class="mt-4 space-y-3 max-h-[80vh] overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- Checkout -->
+<div id="checkoutModal" class="fixed inset-0 z-50 bg-black/85 hidden flex items-center justify-center p-4">
+  <div class="glass max-w-lg w-full rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+    <button onclick="hide('checkoutModal')" class="absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+    <h3 class="font-serif text-2xl font-bold mb-3"><i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp Checkout</h3>
+    <form onsubmit="submitCheckout(event)" class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="lbl">Full Name</label><input id="cName" required class="inp"></div>
+        <div><label class="lbl">Phone</label><input id="cPhone" type="tel" required class="inp"></div>
+      </div>
+      <div><label class="lbl">Delivery Address / City</label><input id="cAddr" required class="inp"></div>
+      <div><label class="lbl">Notes</label><textarea id="cNotes" rows="2" class="inp"></textarea></div>
+      <div class="flex justify-between font-bold"><span>Total</span><span id="coTotal" class="text-glowPink font-serif text-lg">$0.00</span></div>
+      <button class="w-full py-3 rounded-xl bg-emerald-600 font-bold text-sm">Complete Order via WhatsApp</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-6 right-6 z-[60] glass px-5 py-3 rounded-xl text-sm transition-all duration-300 translate-y-24 opacity-0 pointer-events-none"></div>
+
+<script>
+// ===== CONFIG: paste your Supabase values (Project Settings > API) =====
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const WHATSAPP = '263778920506';
+const BUCKET = 'product-images';
+// =======================================================================
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const CATS = [['All','All Products'],['Hair Plugs','Hair Plugs'],['Bundles','Bundles'],['Beauty','Beauty'],['Style','Style & Wigs']];
+const load = (k) => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
+
+let products = [], cart = load('hg_cart'), wishlist = load('hg_wishlist');
+let isAdmin = false, currentCategory = 'All', searchQuery = '', pendingImage = null;
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => $(id).classList.remove('hidden');
+const hide = (id) => $(id).classList.add('hidden');
+const money = (n) => '$' + Number(n).toFixed(2);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const findP = (id) => products.find(p => p.id === id);
+
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg;
+  t.classList.remove('translate-y-24','opacity-0');
+  setTimeout(() => t.classList.add('translate-y-24','opacity-0'), 3000);
+}
+function saveLocal() {
+  localStorage.setItem('hg_cart', JSON.stringify(cart));
+  localStorage.setItem('hg_wishlist', JSON.stringify(wishlist));
+}
+
+// ---------- Init ----------
+(async function init() {
+  $('cats').innerHTML = CATS.map(([v,l]) => `<button onclick="filterCategory('${v}')" id="cat-${v}" class="cat-btn border border-glowPink/30 px-4 py-2 rounded-full text-gray-300">${l}</button>`).join('');
+  filterCategory('All');
+  const { data: { session } } = await sb.auth.getSession();
+  setAdmin(!!session);
+  sb.auth.onAuthStateChange((_e, s) => setAdmin(!!s));
+  await loadProducts();
+  updateCart(); updateWish();
+})();
+
+async function loadProducts() {
+  const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Could not load products'); console.error(error); return; }
+  products = data.map(p => ({ id: p.id, title: p.title, price: p.price, category: p.category, description: p.description, image: p.image_url }));
+  renderProducts();
+}
+
+// ---------- Auth ----------
+function setAdmin(on) {
+  isAdmin = on;
+  $('adminBar').classList.toggle('hidden', !on);
+  $('adminBadge').classList.toggle('hidden', !on);
+  $('authBtn').innerHTML = on
+    ? `<button onclick="logout()" class="px-3 py-2 rounded-full glass text-glowPink text-xs font-semibold"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>`
+    : `<button onclick="show('authModal')" class="btn rounded-full text-xs"><i class="fa-solid fa-lock"></i> Sign In</button>`;
+  renderProducts();
+}
+async function handleLogin(e) {
+  e.preventDefault();
+  $('aBtn').disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email: $('aEmail').value.trim(), password: $('aPass').value });
+  $('aBtn').disabled = false;
+  if (error) return toast('Wrong email or password');
+  hide('authModal'); $('aPass').value = ''; toast('Signed in');
+}
+async function logout() { await sb.auth.signOut(); toast('Signed out'); }
+
+// ---------- Catalog ----------
+function filterCategory(c) {
+  currentCategory = c;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+  const b = $('cat-' + c); if (b) b.classList.add('on');
+  renderProducts();
+}
+function toggleSearch() { $('searchBar').classList.toggle('hidden'); $('searchInput').focus(); }
+
+function renderProducts() {
+  const list = products.filter(p => (currentCategory === 'All' || p.category === currentCategory) &&
+    (p.title + p.description + p.category).toLowerCase().includes(searchQuery));
+  $('empty').classList.toggle('hidden', list.length > 0);
+  $('grid').innerHTML = list.map(p => {
+    const w = wishlist.some(i => i.id === p.id);
+    return `<div class="glass rounded-2xl overflow-hidden relative flex flex-col">
+      <div class="absolute top-3 right-3 z-10 flex gap-2">
+        ${isAdmin ? `<button onclick="openForm('${p.id}')" class="w-9 h-9 rounded-full bg-black/80 text-glowPink"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+        <button onclick="deleteProduct('${p.id}')" class="w-9 h-9 rounded-full bg-black/80 text-red-400"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
+        <button onclick="toggleWish('${p.id}')" class="w-9 h-9 rounded-full bg-black/80 ${w ? 'text-glowPink' : 'text-gray-300'}"><i class="${w ? 'fa-solid' : 'fa-regular'} fa-heart text-sm"></i></button>
+      </div>
+      <div class="h-64 bg-black/40 cursor-pointer" onclick="openView('${p.id}')"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" class="w-full h-full object-cover"></div>
+      <div class="p-4 flex-1 flex flex-col justify-between">
+        <div><span class="text-[10px] uppercase text-pink-300 tracking-widest">${esc(p.category)}</span>
+        <h3 class="font-serif font-bold text-lg">${esc(p.title)}</h3>
+        <p class="text-gray-400 text-xs mt-1 line-clamp-2">${esc(p.description)}</p></div>
+        <div class="mt-4 pt-3 border-t border-glowPink/15 flex items-center justify-between">
+          <span class="font-serif font-extrabold text-xl text-glowPink">${money(p.price)}</span>
+          <button onclick="addToCart('${p.id}')" class="btn text-xs"><i class="fa-solid fa-plus"></i> Bag</button>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+
+function openView(id) {
+  const p = findP(id); if (!p) return;
+  $('viewBody').innerHTML = `
+    <div class="rounded-xl overflow-hidden h-72"><img src="${esc(p.image)}" alt="${esc(p.title)}" class="w-full h-full object-cover"></div>
+    <div class="flex flex-col justify-between">
+      <div><span class="text-xs uppercase font-bold text-pink-400">${esc(p.category)}</span>
+        <h2 class="font-serif text-2xl font-bold">${esc(p.title)}</h2>
+        <div class="text-3xl font-serif font-extrabold text-glowPink my-3">${money(p.price)} USD</div>
+        <p class="text-gray-300 text-sm">${esc(p.description)}</p></div>
+      <div class="mt-5 space-y-2">
+        <button onclick="addToCart('${p.id}');hide('viewModal')" class="btn w-full py-3">Add To Bag</button>
+        <button onclick="inquire('${p.id}')" class="w-full py-2.5 rounded-xl bg-emerald-600 text-xs font-bold"><i class="fa-brands fa-whatsapp"></i> Order via WhatsApp</button>
+      </div></div>`;
+  show('viewModal');
+}
+function inquire(id) {
+  const p = findP(id);
+  openWA(`*PRODUCT INQUIRY: HOOK & GLOW*\n\nProduct: ${p.title}\nPrice: ${money(p.price)} USD\n\nIs this available?`);
+}
+
+// ---------- Admin: add / edit / delete ----------
+function openForm(id) {
+  const p = id ? findP(id) : null;
+  pendingImage = null;
+  $('formTitleH').textContent = p ? 'Edit Product' : 'Add New Product';
+  $('fId').value = p ? p.id : '';
+  $('fTitle').value = p ? p.title : '';
+  $('fPrice').value = p ? p.price : '';
+  $('fCat').value = p ? p.category : 'Hair Plugs';
+  $('fDesc').value = p ? p.description : '';
+  const prev = $('fPreview');
+  prev.src = p ? p.image : ''; prev.classList.toggle('hidden', !p);
+  show('formModal');
+}
+function pickImage(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(1, 1000 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = img.width * s; c.height = img.height * s;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    c.toBlob(b => {
+      pendingImage = b;
+      const prev = $('fPreview'); prev.src = URL.createObjectURL(b); prev.classList.remove('hidden');
+    }, 'image/jpeg', 0.8);
+  };
+  img.src = URL.createObjectURL(file);
+}
+async function saveProduct(e) {
+  e.preventDefault();
+  if (!isAdmin) return;
+  const id = $('fId').value;
+  const existing = id ? findP(id) : null;
+  if (!existing && !pendingImage) return toast('Please choose a photo');
+  $('fSave').disabled = true; $('fSave').textContent = 'Saving...';
+  try {
+    let image_url = existing ? existing.image : '';
+    if (pendingImage) {
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const up = await sb.storage.from(BUCKET).upload(path, pendingImage, { contentType: 'image/jpeg' });
+      if (up.error) throw up.error;
+      image_url = sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    }
+    const row = { title: $('fTitle').value.trim(), price: parseFloat($('fPrice').value), category: $('fCat').value, description: $('fDesc').value.trim(), image_url };
+    const res = id ? await sb.from('products').update(row).eq('id', id) : await sb.from('products').insert(row);
+    if (res.error) throw res.error;
+    hide('formModal'); toast('Product saved, live for all buyers');
+    await loadProducts();
+  } catch (err) { console.error(err); toast('Save failed: ' + (err.message || 'error')); }
+  $('fSave').disabled = false; $('fSave').textContent = 'Save Product';
+}
+async function deleteProduct(id) {
+  if (!isAdmin || !confirm('Delete this product?')) return;
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) return toast('Delete failed');
+  cart = cart.filter(i => i.id !== id); wishlist = wishlist.filter(i => i.id !== id);
+  saveLocal(); updateCart(); updateWish(); toast('Product removed');
+  await loadProducts();
+}
+
+// ---------- Cart ----------
+function addToCart(id) {
+  const p = findP(id); if (!p) return;
+  const ex = cart.find(i => i.id === id);
+  ex ? ex.qty++ : cart.push({ ...p, qty: 1 });
+  saveLocal(); updateCart(); toast(`Added "${p.title}"`);
+}
+function qty(id, d) {
+  const i = cart.find(x => x.id === id); if (!i) return;
+  i.qty += d; if (i.qty <= 0) cart = cart.filter(x => x.id !== id);
+  saveLocal(); updateCart();
+}
+const cartTotal = () => cart.reduce((a, i) => a + i.price * i.qty, 0);
+function updateCart() {
+  $('cartBadge').textContent = cart.reduce((a, i) => a + i.qty, 0);
+  $('cartTotal').textContent = money(cartTotal());
+  $('cartItems').innerHTML = cart.length ? cart.map(i => `
+    <div class="flex gap-3 items-center bg-black/40 p-3 rounded-xl border border-glowPink/20">
+      <img src="${esc(i.image)}" alt="" class="w-16 h-16 rounded-lg object-cover">
+      <div class="flex-1 min-w-0"><h4 class="text-sm font-semibold truncate">${esc(i.title)}</h4>
+        <p class="text-xs text-glowPink font-bold">${money(i.price)}</p>
+        <div class="flex items-center gap-3 mt-1"><button onclick="qty('${i.id}',-1)" class="w-6 h-6 rounded bg-white/10">-</button><span class="text-xs font-bold">${i.qty}</span><button onclick="qty('${i.id}',1)" class="w-6 h-6 rounded bg-white/10">+</button></div></div>
+    </div>`).join('') : '<p class="text-center py-10 text-gray-400 text-sm">Your bag is empty</p>';
+}
+
+// ---------- Wishlist ----------
+function toggleWish(id) {
+  const p = findP(id); if (!p) return;
+  const i = wishlist.findIndex(x => x.id === id);
+  i >= 0 ? wishlist.splice(i, 1) : wishlist.push(p);
+  saveLocal(); renderProducts(); updateWish();
+}
+function updateWish() {
+  const b = $('wishBadge'); b.textContent = wishlist.length; b.classList.toggle('hidden', !wishlist.length);
+  $('wishItems').innerHTML = wishlist.length ? wishlist.map(i => `
+    <div class="flex gap-3 items-center bg-black/40 p-3 rounded-xl border border-glowPink/20">
+      <img src="${esc(i.image)}" alt="" class="w-16 h-16 rounded-lg object-cover">
+      <div class="flex-1 min-w-0"><h4 class="text-sm font-semibold truncate">${esc(i.title)}</h4><p class="text-xs text-glowPink font-bold">${money(i.price)}</p></div>
+      <button onclick="addToCart('${i.id}')" class="btn text-xs">Add</button></div>`).join('')
+    : '<p class="text-center py-10 text-gray-400 text-sm">Your wishlist is empty</p>';
+}
+
+// ---------- Checkout via WhatsApp ----------
+function openWA(msg) { window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank'); }
+function openCheckout() {
+  if (!cart.length) return toast('Your bag is empty');
+  hide('cartDrawer'); $('coTotal').textContent = money(cartTotal()) + ' USD'; show('checkoutModal');
+}
+function submitCheckout(e) {
+  e.preventDefault();
+  let m = `*NEW ORDER: HOOK AND GLOW BY WINNIE*\n\nName: ${$('cName').value.trim()}\nPhone: ${$('cPhone').value.trim()}\nAddress: ${$('cAddr').value.trim()}\n`;
+  if ($('cNotes').value.trim()) m += `Notes: ${$('cNotes').value.trim()}\n`;
+  m += `\n*ITEMS (USD):*\n` + cart.map((i, n) => `${n + 1}. ${i.title} x${i.qty} - ${money(i.price * i.qty)}`).join('\n');
+  m += `\n\n*TOTAL:* ${money(cartTotal())} USD\n\nPlease confirm my order and send payment details.`;
+  cart = []; saveLocal(); updateCart(); hide('checkoutModal'); openWA(m);
+}
+</script>
+</body>
+</html>
